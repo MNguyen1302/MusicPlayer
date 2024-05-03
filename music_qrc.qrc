@@ -1,0 +1,16 @@
+<RCC>
+  <qresource prefix="newPrefix">
+    <file>icons/music_notation_64px.png</file>
+    <file>icons/Musical Note_64px.png</file>
+    <file>icons/no_audio_64px.png</file>
+    <file>icons/speaker_64px.png</file>
+    <file>icons/reset_64px.png</file>
+    <file>icons/pause_64px.png</file>
+    <file>icons/play_64px.png</file>
+    <file>icons/end_50px.png</file>
+    <file>icons/pause_50px.png</file>
+    <file>icons/play_50px.png</file>
+    <file>icons/skip_to_start_50px.png</file>
+    <file>icons/apple-music-note.jpg</file>
+  </qresource>
+</RCC>
