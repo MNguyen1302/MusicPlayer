@@ -101,3 +101,14 @@ def delete_all_playlists(conn):
         return True
     except mysql.connector.Error as error:
         return False
+    
+def rename_playlist(conn, playlist_id, name):
+    try:
+        conn.connect()
+        query= f"update playlists set name = '{name}' where playlist_id = '{playlist_id}'"
+        execute_query(conn, query)
+        return True
+    except mysql.connector.Error as error:
+        return False
+    finally:
+        conn.close()

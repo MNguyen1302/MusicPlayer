@@ -5,7 +5,7 @@ import eyed3
 
 from PyQt5.QtWidgets import *
 from PyQt5 import QtMultimedia, QtGui, QtWidgets
-from PyQt5.QtCore import QUrl, QTimer
+from PyQt5.QtCore import QUrl, QTimer,  QEvent
 from PyQt5.QtGui import QIcon
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from music import Ui_MainWindow
@@ -51,7 +51,7 @@ class MusicPlayer(QMainWindow, Ui_MainWindow):
         self.btn_play_pause.clicked.connect(self.play_pause_song)
         self.btn_next.clicked.connect(self.default_next)
         self.btn_prev.clicked.connect(self.prev_song)
-        self.btn_add_playlist.clicked.connect(self.show_add_playlist_dialog)
+        self.btn_add_playlist.clicked.connect(lambda: self.show_add_playlist_dialog(1))
         self.btn_remove_song.clicked.connect(self.remove_one_song)
         self.btn_song_list.clicked.connect(lambda: self.change_page(0))
         self.btn_playlists.clicked.connect(lambda: self.change_page(1))
@@ -65,6 +65,45 @@ class MusicPlayer(QMainWindow, Ui_MainWindow):
         self.btn_delete_all_songs.clicked.connect(self.delete_all_songs)
         self.loaded_songs_widget.itemDoubleClicked.connect(self.item_double_clicked)
         self.playlists_list_widget.itemDoubleClicked.connect(self.load_song_of_playlist)
+        self.playlists_list_widget.installEventFilter(self)
+        self.loaded_songs_widget.installEventFilter(self)
+
+    def eventFilter(self, source, event):
+        if event.type() == QEvent.ContextMenu and source is self.playlists_list_widget:
+            menu = QMenu()
+            newAction = menu.addAction("Thêm playlist mới")
+            deleteAction = menu.addAction("Xóa")
+            renameAction = menu.addAction("Đổi tên")
+
+            index = self.playlists_list_widget.indexAt(event.pos())
+            
+            if not index.isValid():
+                menu.removeAction(deleteAction)
+                menu.removeAction(renameAction)
+
+            action = menu.exec_(event.globalPos())
+            if action == newAction:
+                self.show_add_playlist_dialog(1)
+            elif action == deleteAction:
+                self.delete_playlist()
+            elif action == renameAction:
+                self.show_add_playlist_dialog(2)
+            return True
+        elif event.type() == QEvent.ContextMenu and source is self.loaded_songs_widget:
+            menu = QMenu()
+            addAction = menu.addAction("Thêm vào playlist")
+            deleteAction = menu.addAction("Xóa")
+
+            index = self.loaded_songs_widget.indexAt(event.pos())
+            
+            if index.isValid():
+                action = menu.exec_(event.globalPos())
+                if action == addAction:
+                    self.show_add_to_playlist_dialog()
+                elif action == deleteAction:
+                    self.remove_one_song()
+            return True
+        return super().eventFilter(source, event)
 
     def loop_song(self):
         if self.btn_loop.isChecked():
@@ -89,13 +128,27 @@ class MusicPlayer(QMainWindow, Ui_MainWindow):
             return
         self.load_song_list()
 
-    def show_add_playlist_dialog(self):
+    def show_add_playlist_dialog(self, type):
         dialog = QtWidgets.QDialog()
         self.add_playlist_dialog = Ui_Dialog()
         self.add_playlist_dialog.setupUi(dialog)
-
-        self.add_playlist_dialog.btn_add.clicked.connect(self.add_new_playlist)
+        
+        if type == 1:
+            self.add_playlist_dialog.btn_add.clicked.connect(self.add_new_playlist)
+        else:
+            self.add_playlist_dialog.btn_add.setText("Đổi tên")
+            current_selection = self.playlists_list_widget.currentRow()
+            self.add_playlist_dialog.btn_add.clicked.connect(lambda: self.rename_playlist(self.playlists[current_selection].id))
         dialog.exec_()
+
+    def rename_playlist(self, playlist_id):
+        name = self.add_playlist_dialog.txtNamePlaylist.text()
+        result = db.rename_playlist(self.connection, playlist_id, name)
+        if result:
+            self.show_info_messagebox("Bạn đã đổi tên playlist thành công!")
+            self.load_playlists()
+        else:
+            self.show_info_messagebox("Bạn thực hiện đổi tên thất bại")
 
     def add_new_playlist(self):
         name = self.add_playlist_dialog.txtNamePlaylist.text()
@@ -108,12 +161,16 @@ class MusicPlayer(QMainWindow, Ui_MainWindow):
             self.show_info_messagebox("Thêm playlist mới thất bại")
 
     def show_add_to_playlist_dialog(self):
-        dialog = QtWidgets.QDialog()
-        self.add_to_playlist_dialog = Ui_add_to_playlist_dialog()
-        self.add_to_playlist_dialog.setupUi(dialog)
+        index = self.loaded_songs_widget.currentRow()
+        if index >= 0:
+            dialog = QtWidgets.QDialog()
+            self.add_to_playlist_dialog = Ui_add_to_playlist_dialog()
+            self.add_to_playlist_dialog.setupUi(dialog)
 
-        self.add_to_playlist_dialog.btn_add.clicked.connect(self.add_song_to_playlist)
-        dialog.exec_()
+            self.add_to_playlist_dialog.btn_add.clicked.connect(self.add_song_to_playlist)
+            dialog.exec_()
+        else:
+            self.show_info_messagebox("Hãy chọn bài hát muốn thêm vào playlist")
 
     def add_song_to_playlist(self):
         index = self.loaded_songs_widget.currentRow()

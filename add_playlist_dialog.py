@@ -74,7 +74,7 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Add Song"))
+        Dialog.setWindowTitle(_translate("Dialog", "Thêm playlist"))
         self.btn_add.setText(_translate("Dialog", "Thêm"))
         self.btn_cancel.setText(_translate("Dialog", "Hủy"))
         self.label_2.setText(_translate("Dialog", "Tên playlist"))

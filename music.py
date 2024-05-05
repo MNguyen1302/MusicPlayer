@@ -489,9 +489,9 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Music Player"))
-        self.name_song.setText(_translate("MainWindow", "Name song"))
-        self.name_artist.setText(_translate("MainWindow", "Name artist"))
-        self.btn_add_song_playlist.setText(_translate("MainWindow", "Add to Playlists"))
+        self.name_song.setText(_translate("MainWindow", "Bài hát"))
+        self.name_artist.setText(_translate("MainWindow", "Tên nghệ sĩ"))
+        self.btn_add_song_playlist.setText(_translate("MainWindow", "Thêm vào playlist"))
         self.start_time_label.setText(_translate("MainWindow", "00:00"))
         self.end_time_label.setText(_translate("MainWindow", "00:00"))
         self.btn_song_list.setText(_translate("MainWindow", "Danh sách nhạc"))
