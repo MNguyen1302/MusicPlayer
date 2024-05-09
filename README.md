@@ -30,3 +30,5 @@
     ```bash
     python app.py
   
+## LICENSE
+[MIT License](LICENSE)
